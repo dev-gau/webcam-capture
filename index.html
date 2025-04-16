@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Photo Booth Cute</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        text-align: center;
+        background: url("Hinh-nen-dong-cho-may-tinh-cuc-dep-800x450.gif") no-repeat center center fixed;
+        background-size: cover;
+        margin: 0;
+        padding: 20px;
+        color: white;
+      }
+
+      h1 {
+        font-size: 2.5em;
+        color: #ff6f61;
+        margin-bottom: 20px;
+      }
+
+      video {
+        border-radius: 15px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        margin-bottom: 15px;
+        transition: transform 0.3s ease-in-out;
+      }
+
+      video:hover {
+        transform: scale(1.05);
+      }
+
+      .photo-container {
+        display: flex;
+        justify-content: space-evenly;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 30px;
+      }
+
+      .photo-container img {
+        width: 400px;
+        height: 400px;
+        object-fit: cover;
+        border-radius: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+      }
+
+      .photo-container img:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      .capture-btn,
+      .download-btn,
+      .reset-btn,
+      .clear-btn {
+        padding: 12px 25px;
+        margin: 10px;
+        font-size: 18px;
+        cursor: pointer;
+        background-color: #ff6f61;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+      }
+
+      .capture-btn:hover,
+      .download-btn:hover,
+      .reset-btn:hover,
+      .clear-btn:hover {
+        background-color: #ff8c6d;
+        transform: scale(1.1);
+      }
+
+      .capture-btn:active,
+      .download-btn:active,
+      .reset-btn:active,
+      .clear-btn:active {
+        transform: scale(1);
+      }
+
+      .instructions {
+        margin-top: 20px;
+        font-size: 16px;
+        color: #555;
+        color: white;
+      }
+
+      .filter-container {
+        margin-top: 20px;
+      }
+
+      .filter-btn {
+        padding: 8px 15px;
+        margin: 5px;
+        cursor: pointer;
+        background-color: #fff;
+        border: 2px solid #ff6f61;
+        border-radius: 15px;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+      }
+
+      .filter-btn:hover {
+        background-color: #ff6f61;
+        color: white;
+      }
+
+      @keyframes fadeIn {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      .wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .preview-btn {
+        padding: 12px 25px;
+        margin: 10px;
+        font-size: 18px;
+        cursor: pointer;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+      }
+
+      .preview-btn:hover {
+        background-color: #45a049;
+        transform: scale(1.1);
+      }
+
+      .preview-btn:active {
+        transform: scale(1);
+      }
+
+      .preview-modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        z-index: 1000;
+      }
+
+      .preview-modal img {
+        width: 500px;
+        height: 500px;
+        margin: 5px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 5px solid #ff6f61;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <h1>Devzjex</h1>
+      <video id="video" width="640" height="480" autoplay></video>
+      <br />
+      <button class="capture-btn" id="capture">Chụp Ảnh</button>
+
+      <div class="photo-container" id="photos"></div>
+
+      <button class="download-btn" id="download">Tải Ảnh</button>
+      <button class="clear-btn" id="clear">Xoá Tất Cả Ảnh</button>
+      <button class="preview-btn" id="preview">Xem Trước</button>
+
+      <p class="instructions">Chụp từ 2 đến 6 ảnh và tải ảnh kết quả về.</p>
+
+      <div class="filter-container">
+        <button class="filter-btn" id="filterDefault">Không có Filter</button>
+        <button class="filter-btn" id="filter1">Tăng sáng</button>
+        <button class="filter-btn" id="filter2">Màu U Buồn</button>
+        <button class="filter-btn" id="filter3">Màu Thiên Nhiên</button>
+        <button class="filter-btn" id="filter4">Filter Trang Điểm</button>
+        <button class="filter-btn" id="filter5">Màu Tươi Tắn</button>
+      </div>
+
+      <div class="modal-overlay" id="modalOverlay"></div>
+      <div class="preview-modal" id="previewModal">
+        <h2>Ảnh Đã Chụp</h2>
+        <div class="preview-container" id="previewImages"></div>
+        <button class="clear-btn" id="closePreview">Đóng</button>
+      </div>
+    </div>
+
+    <script>
+      const video = document.getElementById("video");
+      const captureButton = document.getElementById("capture");
+      const photosContainer = document.getElementById("photos");
+      const clearButton = document.getElementById("clear");
+      const downloadButton = document.getElementById("download");
+      const capturedImages = [];
+
+      const previewButton = document.getElementById("preview");
+      const previewModal = document.getElementById("previewModal");
+      const modalOverlay = document.getElementById("modalOverlay");
+      const previewImagesContainer = document.getElementById("previewImages");
+      const closePreviewButton = document.getElementById("closePreview");
+      let currentFilter = "";
+
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          video.srcObject = stream;
+        })
+        .catch((err) => {
+          console.error("Lỗi khi truy cập webcam:", err);
+        });
+
+      captureButton.addEventListener("click", () => {
+        if (capturedImages.length < 6) {
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const context = canvas.getContext("2d");
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          capturedImages.push(canvas.toDataURL("image/png"));
+
+          const img = document.createElement("img");
+          img.src = capturedImages[capturedImages.length - 1];
+          photosContainer.appendChild(img);
+
+          if (capturedImages.length >= 6) {
+            captureButton.disabled = true;
+          }
+        }
+      });
+
+      document.getElementById("filter1").addEventListener("click", () => {
+        applyFilter("brightness(1.5)");
+      });
+
+      document.getElementById("filter2").addEventListener("click", () => {
+        applyFilter("contrast(0.6) saturate(0.8)");
+      });
+
+      document.getElementById("filter3").addEventListener("click", () => {
+        applyFilter("sepia(0.3) saturate(1.2)");
+      });
+
+      document.getElementById("filter4").addEventListener("click", () => {
+        applyFilter("hue-rotate(45deg) saturate(1.5)");
+      });
+
+      document.getElementById("filter5").addEventListener("click", () => {
+        applyFilter("hue-rotate(90deg) saturate(2)");
+      });
+
+      document.getElementById("filterDefault").addEventListener("click", () => {
+        applyFilter("");
+      });
+
+      function applyFilter(filterValue) {
+        const imgs = document.querySelectorAll(".photo-container img");
+        imgs.forEach((img) => {
+          img.style.filter = filterValue;
+        });
+      }
+
+      clearButton.addEventListener("click", () => {
+        capturedImages.length = 0;
+        photosContainer.innerHTML = "";
+      });
+
+      downloadButton.addEventListener("click", () => {
+        console.log("Nút tải ảnh đã được nhấn");
+
+        if (capturedImages.length >= 2) {
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
+
+          const numImages = capturedImages.length;
+          const columns = 2;
+          const rows = Math.ceil(numImages / columns);
+          const imgWidth = 500;
+          const imgHeight = 400;
+          const borderWidth = 10;
+          const spacing = 20;
+          const outerPadding = 30;
+
+          canvas.width = columns * (imgWidth + borderWidth * 2) + (columns - 1) * spacing + outerPadding * 2;
+          canvas.height = rows * (imgHeight + borderWidth * 2) + (rows - 1) * spacing + outerPadding * 2;
+
+          const background = new Image();
+          background.src = "./3-31.jpg";
+
+          background.onload = () => {
+            context.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+            let imagesLoaded = 0;
+
+            capturedImages.forEach((imageData, index) => {
+              const img = new Image();
+              img.src = imageData;
+
+              img.onload = () => {
+                const col = index % columns;
+                const row = Math.floor(index / columns);
+
+                const x = outerPadding + col * (imgWidth + borderWidth * 2 + spacing);
+                const y = outerPadding + row * (imgHeight + borderWidth * 2 + spacing);
+
+                context.filter = currentFilter;
+                context.drawImage(img, x + borderWidth, y + borderWidth, imgWidth, imgHeight);
+
+                imagesLoaded++;
+                if (imagesLoaded === capturedImages.length) {
+                  const downloadLink = document.createElement("a");
+                  downloadLink.href = canvas.toDataURL("image/png");
+                  downloadLink.download = "photo-devzjex-result.png";
+                  downloadLink.click();
+                }
+              };
+
+              img.onerror = (err) => {
+                console.error("Lỗi khi tải ảnh:", err);
+              };
+            });
+          };
+
+          background.onerror = (err) => {
+            console.error("Lỗi khi tải ảnh nền:", err);
+          };
+        } else {
+          alert("Vui lòng chụp ít nhất 2 ảnh!");
+        }
+      });
+
+      function applyFilter(filterValue) {
+        currentFilter = filterValue;
+        const imgs = document.querySelectorAll(".photo-container img");
+        imgs.forEach((img) => {
+          img.style.filter = filterValue;
+        });
+      }
+
+      previewButton.addEventListener("click", () => {
+        previewImagesContainer.innerHTML = "";
+        if (capturedImages.length > 0) {
+          capturedImages.forEach((imageData) => {
+            const img = document.createElement("img");
+            img.src = imageData;
+            img.style.filter = currentFilter;
+            previewImagesContainer.appendChild(img);
+          });
+          previewModal.style.display = "block";
+          modalOverlay.style.display = "block";
+        } else {
+          alert("Chưa có ảnh nào để xem trước!");
+        }
+      });
+
+      closePreviewButton.addEventListener("click", () => {
+        previewModal.style.display = "none";
+        modalOverlay.style.display = "none";
+      });
+
+      modalOverlay.addEventListener("click", () => {
+        previewModal.style.display = "none";
+        modalOverlay.style.display = "none";
+      });
+    </script>
+  </body>
+</html>
