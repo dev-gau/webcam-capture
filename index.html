@@ -26,6 +26,7 @@
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         margin-bottom: 15px;
         transition: transform 0.3s ease-in-out;
+        max-width: 100%;
       }
 
       video:hover {
@@ -38,11 +39,12 @@
         gap: 10px;
         flex-wrap: wrap;
         margin-top: 30px;
+        justify-content: center;
       }
 
       .photo-container img {
-        width: 400px;
-        height: 400px;
+        width: 200px;
+        height: 200px;
         object-fit: cover;
         border-radius: 20px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -161,8 +163,8 @@
       }
 
       .preview-modal img {
-        width: 500px;
-        height: 500px;
+        width: 100%;
+        height: auto;
         margin: 5px;
         object-fit: cover;
         border-radius: 10px;
@@ -179,6 +181,58 @@
         height: 100%;
         background-color: rgba(0, 0, 0, 0.5);
         z-index: 999;
+      }
+
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 2em;
+        }
+
+        .photo-container img {
+          width: 100px;
+          height: 100px;
+        }
+
+        .capture-btn,
+        .download-btn,
+        .reset-btn,
+        .clear-btn {
+          padding: 10px 20px;
+          font-size: 16px;
+        }
+
+        .preview-modal img {
+          width: 90%;
+          height: auto;
+        }
+
+        .filter-btn {
+          padding: 8px 12px;
+          font-size: 14px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        h1 {
+          font-size: 1.5em;
+        }
+
+        .photo-container img {
+          width: 80px;
+          height: 80px;
+        }
+
+        .capture-btn,
+        .download-btn,
+        .reset-btn,
+        .clear-btn {
+          padding: 8px 18px;
+          font-size: 14px;
+        }
+
+        .preview-btn {
+          font-size: 16px;
+        }
       }
     </style>
   </head>
@@ -337,10 +391,17 @@
 
                 imagesLoaded++;
                 if (imagesLoaded === capturedImages.length) {
-                  const downloadLink = document.createElement("a");
-                  downloadLink.href = canvas.toDataURL("image/png");
-                  downloadLink.download = "photo-devzjex-result.png";
-                  downloadLink.click();
+                  // Tạo blob từ dữ liệu của canvas
+                  canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const downloadLink = document.createElement("a");
+                    downloadLink.href = url;
+                    downloadLink.download = "photo-devzjex-result.png";
+                    downloadLink.click();
+
+                    // Giải phóng URL sau khi tải xong
+                    URL.revokeObjectURL(url);
+                  }, "image/png");
                 }
               };
 
